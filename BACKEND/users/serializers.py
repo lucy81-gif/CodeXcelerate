@@ -18,8 +18,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class LeaderboardSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source = 'user.username')
+    rank= serializers.IntegerField(read_only = True)
 
     class Meta:
         model = Profile
-        fields = ['username','xp','streak']
+        fields = ['rank','username','xp','streak']
         

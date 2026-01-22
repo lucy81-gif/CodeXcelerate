@@ -1,3 +1,4 @@
+import profile
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,7 +8,11 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 
-from .models import Profile
+from django.utils import timezone
+from django.db.models import Sum
+from datetime import timedelta
+
+from .models import Profile, XPTransaction
 from.serializers import LeaderboardSerializer, ProfileSerializer
 
 
@@ -35,3 +40,46 @@ class LeaderboardView(ListAPIView):
     serializer_class = LeaderboardSerializer
     permission_classes = [AllowAny]
     
+#All time leaderboard
+class AllTimeLeaderboardView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = LeaderboardSerializer
+
+    def get_queryset(self):
+        return Profile.objects.select_related('user').order_by('-xp')
+    
+    def list(self,request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data =[]
+
+        for index, Profile in enumerate(queryset,start=1):
+            data.append({
+                'rank': index,
+                'username': profile.users.username,
+                'xp': profile.xp,
+                'streak': profile.streak
+            })
+        return Response(data)
+    
+#Weekly Leaderboard
+class WeeklyLeaderboardView(ListAPIView):
+    permission_classes = [AllowAny]
+
+def get_queryset(self):
+        return Profile.objects.select_related('user').order_by('-xp')
+
+def list(self, request, *args, **kwargs):
+    one_week_ago = timezone.now() - timedelta(days=7)
+
+    weekly_xp =(
+        XPTransaction.objects.filter(created_at__gte=one_week_ago).
+        values('user__username').annotate(total_xp=Sum('amount')).order_by('-total_xp')    
+    )
+    data = []
+    for index, entry in enumerate(weekly_xp, start=1):
+        data.append({
+            'rank': index,
+            'username': entry['user__username'],
+            'xp': entry['total_xp'] or 0,
+        })
+    return Response(data)
