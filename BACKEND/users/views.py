@@ -12,6 +12,8 @@ from django.utils import timezone
 from django.db.models import Sum
 from datetime import timedelta
 
+from .serializers import RegisterSerializer
+
 from .models import Profile, XPTransaction
 from.serializers import LeaderboardSerializer, ProfileSerializer
 
@@ -83,3 +85,14 @@ def list(self, request, *args, **kwargs):
             'xp': entry['total_xp'] or 0,
         })
     return Response(data)
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "User Registered successfully"},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
