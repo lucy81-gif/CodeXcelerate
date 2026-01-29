@@ -19,3 +19,13 @@ class XPTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} + {self.amount} XP"
+
+#Platform Model
+class Platform(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    website = models.URLField(blank=True)
+    logo = models.ImageField(upload_to="platforms/", blank=True, null=True)
+
+    def __str__(self):
+        return self.name
