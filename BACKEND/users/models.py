@@ -61,3 +61,41 @@ class Course(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.platform.name})"
+
+#Lesson Model
+class Lesson(models.Model):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="lessons"
+    )
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+
+    lesson_type = models.CharField(
+        max_length=50,
+        choices=[
+            ("video", "Video"),
+            ("article", "Article"),
+            ("quiz", "Quiz"),
+            ("lab", "Lab"),
+        ]
+    )
+
+    external_url = models.URLField(
+        help_text="Direct link to the lesson content"
+    )
+
+    order = models.PositiveIntegerField(
+        help_text="Lesson order within the course"
+    )
+
+    duration_minutes = models.PositiveIntegerField(default=0)
+
+    xp_reward = models.PositiveIntegerField(default=10)
+
+    is_preview = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.course.title} → {self.title}"
