@@ -29,3 +29,35 @@ class Platform(models.Model):
 
     def __str__(self):
         return self.name
+
+#Course Model
+class Course(models.Model):
+    platform = models.ForeignKey(
+        Platform,
+        on_delete=models.CASCADE,
+        related_name="courses"
+    )
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+
+    external_url = models.URLField(
+        help_text="Link to the course on the external platform"
+    )
+
+    difficulty = models.CharField(
+        max_length=50,
+        choices=[
+            ("beginner", "Beginner"),
+            ("intermediate", "Intermediate"),
+            ("advanced", "Advanced"),
+        ]
+    )
+
+    estimated_hours = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.platform.name})"
