@@ -1,4 +1,5 @@
 import profile
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,12 +21,15 @@ from.serializers import LeaderboardSerializer, ProfileSerializer
 
 # Create your views here.
 class ProfileView(APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        profile = Profile.objects.first ()
-        serializer = ProfileSerializer (profile)
-        return Response (serializer.data)
+        user = request.user
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        })
     
     def put(self, request):
         profile = Profile.objects.first()
@@ -57,7 +61,7 @@ class AllTimeLeaderboardView(ListAPIView):
         for index, Profile in enumerate(queryset,start=1):
             data.append({
                 'rank': index,
-                'username': profile.users.username,
+                'username': profile.username,
                 'xp': profile.xp,
                 'streak': profile.streak
             })
@@ -87,12 +91,11 @@ def list(self, request, *args, **kwargs):
     return Response(data)
 
 class RegisterView(APIView):
+    permission_classes = []
+
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"message": "User Registered successfully"},
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.create_user(
+            username=request.data['username'],
+            password=request.data['password']
+        )
+        return Response({"message": "User created"})

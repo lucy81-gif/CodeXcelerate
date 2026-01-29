@@ -6,6 +6,7 @@ class Profile (models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     xp = models.IntegerField(default=0)
     streak = models.IntegerField(default=0)
+    badges = models.JSONField(default=list,blank=True)
     created_at= models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

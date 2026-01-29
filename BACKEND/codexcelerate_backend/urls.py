@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/auth/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/users/', include('users.urls')),
     path('api/users/profile/',ProfileView.as_view(), name='Profile'),
+    path('auth/', include('users.urls')),
 ]
 
 
